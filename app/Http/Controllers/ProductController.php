@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller implements HasMiddleware
 {
@@ -14,9 +16,18 @@ class ProductController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware('auth:sanctum', except: ['index', 'show'])
+            new Middleware('auth:sanctum', except: ['index', 'show', 'userProducts'])
         ];
     }
+
+    public function userProducts(User $user)
+    {
+        $userProducts = $user->products()->get();
+        return [
+            'data' => $userProducts
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -88,7 +99,7 @@ class ProductController extends Controller implements HasMiddleware
     {
         // modify is the function in ProductPolicy file
         Gate::authorize('modify', $product);
-        
+
         $product->delete();
         return ['message' => 'this product is deleted'];
     }

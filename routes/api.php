@@ -1,9 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ZakatController;
 use App\Http\Controllers\ProductController;
-use Illuminate\Http\Request;
 
 // Auth -----------------
 // get user data
@@ -19,6 +20,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 
 // Zakat -------------
+Route::get('/{user}/zakat', [ZakatController::class, 'userZakats']);
+Route::apiResource('zakat', ZakatController::class);
 
 // Products -------------
+Route::get('/{user}/product', [ProductController::class, 'userProducts']);
 Route::apiResource('products', ProductController::class);
