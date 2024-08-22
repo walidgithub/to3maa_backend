@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Zakat;
-use App\Models\User;
+use App\Models\ZakatProducts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Routing\Controllers\Middleware;
@@ -15,13 +15,14 @@ class ZakatController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware('auth:sanctum', except: ['index', 'show', 'userZakats'])
+            new Middleware('auth:sanctum', except: ['index', 'show'])
         ];
     }
 
-    public function userZakats(User $user)
+    public function userZakats()
     {
-        $userZakats = $user->zakats()->get();
+        $user = auth('sanctum')->user();
+        $userZakats = $user->zakats;
         return [
             'data' => $userZakats
         ];
@@ -42,14 +43,34 @@ class ZakatController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        $fields = $request->validate([
+        $zakatFields = $request->validate([
             'membersCount' => 'required',
             'zakatValue' => 'required|max:10',
-            'remainValue' => 'required|max:10'
+            'remainValue' => 'required|max:10',
+            'zakatProducts.*.productName' => 'required|max:255',
+            'zakatProducts.*.productPrice' => 'required|max:10',
+            'zakatProducts.*.productDesc' => 'max:255',
+            'zakatProducts.*.productImage' => 'required|max:255',
+            'zakatProducts.*.sa3Weight' => 'required',
+            'zakatProducts.*.productQuantity' => 'required'
         ]);
 
-        // relation between user and products to take user_id for product
-        $zakat = $request->user()->zakats()->create($fields);
+        $zakat = $request->user()->zakats()->create($zakatFields);
+
+        $zakatProductsResult = [];
+
+        foreach ($zakatFields['zakatProducts'] as $product) {
+            $zakatProductsResult[] = $zakat->zakatProducts()->create([
+                'productName' => $product['productName'],
+                'productPrice' => $product['productPrice'],
+                'productDesc' => $product['productDesc'],
+                'productImage' => $product['productImage'],
+                'sa3Weight' => $product['sa3Weight'],
+                'productQuantity' => $product['productQuantity'],
+            ]);
+        }
+
+        $zakat['zakatProducts'] = $zakatProductsResult;
         return [
             'data' => $zakat
         ];
@@ -62,6 +83,14 @@ class ZakatController extends Controller implements HasMiddleware
     {
         return [
             'data' => $zakat
+        ];
+    }
+
+    public function showZakatProducts(ZakatProducts $zakatProducts, Zakat $zakat)
+    {
+        $zakatProducts = $zakat->zakatProducts()->get();
+        return [
+            'data' => $zakatProducts
         ];
     }
 
@@ -93,5 +122,36 @@ class ZakatController extends Controller implements HasMiddleware
 
         $zakat->delete();
         return ['message' => 'this zakat is deleted'];
+    }
+
+    public function deleteAllUserZakats()
+    {
+        $user = auth('sanctum')->user();
+        $user->zakats()->delete();
+        return ['message' => 'all zakats are deleted'];
+    }
+
+
+    public function getUserProductTotals()
+    {
+        $user = auth('sanctum')->user();
+
+        $productTotals = collect($user->zakatProducts)
+            ->groupBy('productName')
+            ->map(function ($items) {
+                return [
+                    'productName' => $items->first()->productName,
+                    'productPrice' => $items->first()->productPrice,
+                    'productDesc' => $items->first()->productDesc,
+                    'productImage' => $items->first()->productImage,
+                    'sa3Weight' => $items->first()->sa3Weight,
+                    'productTotals' => array_sum($items->pluck('productQuantity')->toArray())
+                ];
+            })
+            ->values();
+
+        return [
+            'data' => $productTotals
+        ];
     }
 }

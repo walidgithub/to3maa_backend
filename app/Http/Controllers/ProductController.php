@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller implements HasMiddleware
 {
@@ -16,13 +14,15 @@ class ProductController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware('auth:sanctum', except: ['index', 'show', 'userProducts'])
+            new Middleware('auth:sanctum', except: ['index', 'show'])
         ];
     }
 
-    public function userProducts(User $user)
+    public function userProducts()
     {
-        $userProducts = $user->products()->get();
+        $user = auth('sanctum')->user();
+
+        $userProducts = $user->products;
         return [
             'data' => $userProducts
         ];

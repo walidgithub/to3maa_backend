@@ -54,4 +54,8 @@ class User extends Authenticatable
     public function zakats() {
         return $this->hasMany(Zakat::class);
     }
+
+    public function zakatProducts() {
+        return $this->hasManyThrough(ZakatProducts::class,Zakat::class,'user_id','zakat_id','id','id');
+    }
 }

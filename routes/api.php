@@ -20,9 +20,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 
 // Zakat -------------
-Route::get('/{user}/zakat', [ZakatController::class, 'userZakats']);
+Route::get('zakats', [ZakatController::class, 'userZakats']);
+Route::delete('/deleteAllUserZakats', [ZakatController::class, 'deleteAllUserZakats']);
+Route::get('/{zakat}/showZakatProducts', [ZakatController::class, 'showZakatProducts']);
+Route::get('/getUserProductTotals', [ZakatController::class, 'getUserProductTotals']);
 Route::apiResource('zakat', ZakatController::class);
 
+
 // Products -------------
-Route::get('/{user}/product', [ProductController::class, 'userProducts']);
 Route::apiResource('products', ProductController::class);
+Route::get('/product', [ProductController::class, 'userProducts']);
