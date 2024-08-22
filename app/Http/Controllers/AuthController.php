@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Mail\WelcomeMail;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class AuthController extends Controller
 {
@@ -19,6 +23,10 @@ class AuthController extends Controller
 
         $user = User::create($fields);
         $token = $user->createToken($request->name);
+
+        event(new Registered($user));
+
+        Mail::to('myassistantprogram@gmail.com')->send(new WelcomeMail(Auth::user()));
 
         return [
             'user' => $user,
@@ -52,5 +60,14 @@ class AuthController extends Controller
     {
         $request->user()->tokens()->delete();
         return ['message' => 'You are logged out.'];
+    }
+
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+
+        return [
+            "data" => 'fff'
+        ];
     }
 }

@@ -12,6 +12,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+
+// Email Verification -----------------------------------------------------------
+// email verificaion handler
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['auth:sanctum', 'signed']);
+
+// User actions ------------------------------------------------------------------
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -19,7 +25,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
-// Zakat -------------
+// Zakat --------------------------------------------------------------------------
 Route::get('zakats', [ZakatController::class, 'userZakats']);
 Route::delete('/deleteAllUserZakats', [ZakatController::class, 'deleteAllUserZakats']);
 Route::get('/{zakat}/showZakatProducts', [ZakatController::class, 'showZakatProducts']);
@@ -27,6 +33,6 @@ Route::get('/getUserProductTotals', [ZakatController::class, 'getUserProductTota
 Route::apiResource('zakat', ZakatController::class);
 
 
-// Products -------------
+// Products ------------------------------------------------------------------------
 Route::apiResource('products', ProductController::class);
 Route::get('/product', [ProductController::class, 'userProducts']);
