@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Routing\Controllers\Middleware;
@@ -14,18 +15,29 @@ class ProductController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware('auth:sanctum', except: ['index', 'show'])
+            new Middleware(['auth:sanctum'], except: ['index', 'show'])
         ];
     }
 
-    public function userProducts()
+    public function userProducts(): JsonResponse
     {
-        $user = auth('sanctum')->user();
+        try {
+            $user = auth('sanctum')->user();
+    
+            $userProducts = $user->products;
 
-        $userProducts = $user->products;
-        return [
-            'data' => $userProducts
-        ];
+            return response()->json([
+                'status' => true,
+                'data' => $userProducts,
+                'message' => "Successful get user's products"
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -33,9 +45,20 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function index()
     {
-        return [
-            'data' => Product::all()
-        ];
+        try {
+
+            return response()->json([
+                'status' => true,
+                'data' => Product::all(),
+                'message' => "Successful get all products"
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -43,20 +66,31 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        $fields = $request->validate([
-            'productName' => 'required|max:255',
-            'productPrice' => 'required|max:10',
-            'productDesc' => 'max:255',
-            'productImage' => 'required|max:255',
-            'sa3Weight' => 'required',
-            'productQuantity' => 'required',
-        ]);
+        try {
+            $fields = $request->validate([
+                'productName' => 'required|max:255',
+                'productPrice' => 'required|max:10',
+                'productDesc' => 'max:255',
+                'productImage' => 'required|max:255',
+                'sa3Weight' => 'required',
+                'productQuantity' => 'required',
+            ]);
+    
+            // relation between user and products to take user_id for product
+            $product = $request->user()->products()->create($fields);
 
-        // relation between user and products to take user_id for product
-        $product = $request->user()->products()->create($fields);
-        return [
-            'data' => $product
-        ];
+            return response()->json([
+                'status' => true,
+                'data' => $product,
+                'message' => "Successful insert new product"
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -64,9 +98,20 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function show(Product $product)
     {
-        return [
-            'data' => $product
-        ];
+        try {
+
+            return response()->json([
+                'status' => true,
+                'data' => $product,
+                'message' => "Successful show product's info"
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -74,22 +119,32 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function update(Request $request, Product $product)
     {
-        // modify is the function in ProductPolicy file
-        Gate::authorize('modify', $product);
+        try {
+            // modify is the function in ProductPolicy file
+            Gate::authorize('modify', $product);
+    
+            $fields = $request->validate([
+                'productName' => 'required|max:255',
+                'productPrice' => 'required|max:10',
+                'productDesc' => 'required|max:255',
+                'productImage' => 'required|max:255',
+                'sa3Weight' => 'required',
+                'productQuantity' => 'required',
+            ]);
+    
+            $product->update($fields);
 
-        $fields = $request->validate([
-            'productName' => 'required|max:255',
-            'productPrice' => 'required|max:10',
-            'productDesc' => 'required|max:255',
-            'productImage' => 'required|max:255',
-            'sa3Weight' => 'required',
-            'productQuantity' => 'required',
-        ]);
-
-        $product->update($fields);
-        return [
-            'data' => $product
-        ];
+            return response()->json([
+                'status' => true,
+                'data' => $product,
+                'message' => "Successful update product's info"
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -97,10 +152,21 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function destroy(Product $product)
     {
-        // modify is the function in ProductPolicy file
-        Gate::authorize('modify', $product);
+        try {
+            // modify is the function in ProductPolicy file
+            Gate::authorize('modify', $product);
+    
+            $product->delete();
 
-        $product->delete();
-        return ['message' => 'this product is deleted'];
+            return response()->json([
+                'status' => true,
+                'message' => "Successful delete product's info"
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

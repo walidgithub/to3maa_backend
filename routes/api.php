@@ -12,18 +12,14 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
-// Email Verification -----------------------------------------------------------
-// email verificaion handler
-Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['auth:sanctum', 'signed']);
-
-// User actions ------------------------------------------------------------------
+// Auth actions ------------------------------------------------------------------
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // we need to check if user is already logged in by adding middlware
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
+Route::post('/users/update/{user}', [AuthController::class, 'update']);
 
 // Zakat --------------------------------------------------------------------------
 Route::get('zakats', [ZakatController::class, 'userZakats']);

@@ -42,6 +42,8 @@
             <h1>Hello {{ $user->username }}</h1>
 			<h1>Welcome to our app!</h1>
 			<p>We're excited to have you here. Explore our services to get started.</p>
+			<p>This is your code to verify your account</p>
+			<p>{{ $user->verify_code }}</p>
 		</div>
 	</div>
 </body>
