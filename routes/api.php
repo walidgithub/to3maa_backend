@@ -19,7 +19,8 @@ Route::post('/login', [AuthController::class, 'login']);
 // we need to check if user is already logged in by adding middlware
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::post('/users/update/{user}', [AuthController::class, 'update']);
+Route::put('/forgotPass', [AuthController::class, 'forgotPass']);
+Route::put('/resetPass', [AuthController::class, 'resetPass']);
 
 // Zakat --------------------------------------------------------------------------
 Route::get('zakats', [ZakatController::class, 'userZakats']);

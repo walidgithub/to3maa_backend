@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use App\Mail\WelcomeMail;
-use Illuminate\Auth\Events\Registered;
+use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Throwable;
+use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
@@ -30,7 +31,7 @@ class AuthController extends Controller
             event(new Registered($user)); 
 
             // send mail with verify code
-            Mail::to('myassistantprogram@gmail.com')->send(new WelcomeMail(Auth::user()));
+            // Mail::to('myassistantprogram@gmail.com')->send(new WelcomeMail(Auth::user()));
     
             return response()->json([
                 'status' => true,
@@ -106,23 +107,53 @@ class AuthController extends Controller
         }
     }
 
-    public function update(Request $request, User $user)
+    public function forgotPass(Request $request) : JsonResponse
     {
-        try {    
+        try {
+            $user = User::where('email', $request->email)->first();
+
             $fields = $request->validate([
-                'name' => 'required|max:255',
-                'email' => 'required|email|unique:users',
-                'password' => 'required|confirmed',
+                'email' => 'required|email|unique:users,email,'.$user->id,
                 'verify_code' => 'required|max:5'
             ]);
-    
+        
             $user->update($fields);
-
+            
+            // send mail with verify code
+            // Mail::to('myassistantprogram@gmail.com')->send(new ForgotPassword($user));
+    
             return response()->json([
                 'status' => true,
                 'data' => $user,
-                'message' => "Successful update user's info"
+                'message' => 'Getting verification code successful'
             ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function resetPass(Request $request) : JsonResponse
+    {
+        try {
+            $user = User::where('email', $request->email)->first();
+
+            $fields = $request->validate([
+                'email' => 'required|email|unique:users,email,'.$user->id,
+                'password' => 'required|confirmed'
+            ]);
+        
+            $user->update($fields);
+    
+            return response()->json([
+                'status' => true,
+                'user' => $user,
+                'message' => 'Update Password successful'
+            ], 200);
+
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
