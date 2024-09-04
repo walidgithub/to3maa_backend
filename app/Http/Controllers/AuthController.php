@@ -31,7 +31,7 @@ class AuthController extends Controller
             event(new Registered($user)); 
 
             // send mail with verify code
-            // Mail::to('myassistantprogram@gmail.com')->send(new WelcomeMail(Auth::user()));
+            Mail::to('myassistantprogram@gmail.com')->send(new WelcomeMail(Auth::user()));
     
             return response()->json([
                 'status' => true,
@@ -120,7 +120,7 @@ class AuthController extends Controller
             $user->update($fields);
             
             // send mail with verify code
-            // Mail::to('myassistantprogram@gmail.com')->send(new ForgotPassword($user));
+            Mail::to('myassistantprogram@gmail.com')->send(new ForgotPassword($user));
     
             return response()->json([
                 'status' => true,
