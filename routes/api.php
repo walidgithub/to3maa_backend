@@ -33,3 +33,17 @@ Route::apiResource('zakat', ZakatController::class);
 // Products ------------------------------------------------------------------------
 Route::apiResource('products', ProductController::class);
 Route::get('/product', [ProductController::class, 'userProducts']);
+
+/*
+   Cpanel Username: b14_37248124
+   Cpanel Password: To3maa_online
+   Your URL: http://to3maa.byethost14.com or http://www.to3maa.byethost14.com
+   FTP Server : ftpupload.net
+   FTP Login : b14_37248124
+   FTP Password : To3maa_online
+   MySQL Database Name: MUST CREATE IN CPANEL
+   MySQL Username : b14_37248124
+   MySQL Password : To3maa_online
+   MySQL Server: SEE THE CPANEL
+   Cpanel URL: http://cpanel.byethost14.com/
+*/
